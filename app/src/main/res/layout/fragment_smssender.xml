@@ -33,7 +33,17 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content" android:id="@+id/bSend"
             android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginLeft="8dp" android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="3dp" android:layout_marginRight="3dp"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="3dp" android:layout_marginRight="3dp"
+            app:layout_constraintStart_toEndOf="@+id/bShow" android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"/>
+    <Button
+            android:text="Show SMS"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/bShow" app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+    />
 </android.support.constraint.ConstraintLayout>

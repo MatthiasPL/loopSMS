@@ -16,24 +16,32 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import android.content.Intent
 import android.app.PendingIntent
+import android.content.Context
 import android.telephony.SmsManager
+import android.util.Base64
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 
-class MainActivity : AppCompatActivity(), SMSsender.Listener {
+class MainActivity : AppCompatActivity(), SMSsender.Listener, SMSFragment.Listener {
     private val PERMISSIONS_REQUEST_SEND = 100
     private val PERMISSIONS_REQUEST_READ = 100
 
     var smssender = SMSsender()
+    var smsloader = SMSFragment()
     val manager = supportFragmentManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        //var wiad = getAllSms()
     }
 
     override fun onResume() {
         super.onResume()
         checkForSmsSendPermission()
+        //getAllSMS()
     }
 
     private fun checkForSmsSendPermission() {
@@ -82,10 +90,26 @@ class MainActivity : AppCompatActivity(), SMSsender.Listener {
         }
     }
 
-    fun getAllSms(): List<Sms> {
+    override fun getAllSMS(): List<Sms> {
         val lstSms = ArrayList<Sms>()
+
+        /*val cursor = contentResolver.query(Uri.parse("content://sms"), null, null, null, null)
+        val smscount = cursor!!.count
+
+        if (cursor!!.moveToFirst()) { // must check the result to prevent exception
+            do {
+                //var msgData = ""
+                for (idx in 0 until cursor.columnCount) {
+                    lstSms.add(cursor.getString(cursor.getColumnIndex("body")))
+                }
+                // use msgData
+            } while (cursor.moveToNext())
+        } else {
+            // empty box, no SMS
+        }*/
+
         var objSms = Sms()
-        val message = Uri.parse("content://sms/")
+        val message = Uri.parse("content://sms")
         val cr = getApplicationContext().getContentResolver()
 
         val c = cr.query(message, null, null, null, null)
@@ -114,23 +138,42 @@ class MainActivity : AppCompatActivity(), SMSsender.Listener {
                 c!!.moveToNext()
             }
         }
-        // else {
-        // throw new RuntimeException("You have no SMS");
-        // }
+        else {
+            throw RuntimeException("You have no SMS");
+        }
         c!!.close()
+
+        //textView.text = totalSMS.toString()
 
         return lstSms
     }
 
-    fun loadSMSsenderFragment(){
+    override fun loadSMSsenderFragment(){
         smssender = SMSsender()
 
         if ((fragmentContainer as FrameLayout).childCount > 0)
             (fragmentContainer as FrameLayout).removeAllViewsInLayout()
 
         val transaction = manager.beginTransaction()
-        transaction.add(R.id.fragmentContainer, smssender, "mp")
+        transaction.add(R.id.fragmentContainer, smssender, "ss")
         transaction.commit()
+    }
+
+    override fun loadSMSFragment(){
+        smsloader = SMSFragment()
+
+        if ((fragmentContainer as FrameLayout).childCount > 0)
+            (fragmentContainer as FrameLayout).removeAllViewsInLayout()
+
+        val transaction = manager.beginTransaction()
+        transaction.add(R.id.fragmentContainer, smsloader, "sl")
+        transaction.commit()
+        transaction.runOnCommit {
+            val test = supportFragmentManager.findFragmentByTag("sl") as SMSFragment?
+            if(test != null){
+                test.loadList()
+            }
+        }
     }
 
     override fun sendSMS(smsNumber: String, sms: String) {
@@ -148,4 +191,7 @@ class MainActivity : AppCompatActivity(), SMSsender.Listener {
             sentIntent, deliveryIntent
         )
     }
+
+    fun Context.toast(message: CharSequence) =
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }
