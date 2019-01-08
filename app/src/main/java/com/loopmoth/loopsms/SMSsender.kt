@@ -34,7 +34,6 @@ class SMSsender : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view: View = inflater!!.inflate(R.layout.fragment_smssender, container, false)
-
         view.bSend.setOnClickListener {
             try{
                 activityCallback = context as Listener
@@ -45,10 +44,9 @@ class SMSsender : Fragment() {
                 activityCallback!!.sendSMS(number, singlecharacter + message)
                 //Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             }catch(e: Exception){
-                //throw ClassCastException(context?.toString()+" must implement Listener")
+                throw ClassCastException(context?.toString()+" must implement Listener")
             }
         }
-
         view.bShow.setOnClickListener {
             try{
                 activityCallback = context as Listener
@@ -57,7 +55,6 @@ class SMSsender : Fragment() {
                 throw ClassCastException(context?.toString()+" must implement Listener")
             }
         }
-
         return view
     }
 

@@ -19,6 +19,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.telephony.SmsManager
 import android.util.Base64
+import kotlinx.android.synthetic.main.fragment_smssender.*
+import kotlinx.android.synthetic.main.fragment_smssender.view.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -159,6 +161,23 @@ class MainActivity : AppCompatActivity(), SMSsender.Listener, SMSFragment.Listen
         transaction.commit()
     }
 
+    override fun loadSMSsenderFragment(id: String){
+        smssender = SMSsender()
+
+        if ((fragmentContainer as FrameLayout).childCount > 0)
+            (fragmentContainer as FrameLayout).removeAllViewsInLayout()
+
+        val transaction = manager.beginTransaction()
+        transaction.add(R.id.fragmentContainer, smssender, "ss")
+        transaction.commit()
+        transaction.runOnCommit {
+            val test = supportFragmentManager.findFragmentByTag("ss") as SMSsender?
+            if(test != null){
+                test.tvNumber.setText(id)
+            }
+        }
+    }
+
     override fun loadSMSFragment(){
         smsloader = SMSFragment()
 
@@ -170,9 +189,9 @@ class MainActivity : AppCompatActivity(), SMSsender.Listener, SMSFragment.Listen
         transaction.commit()
         transaction.runOnCommit {
             val test = supportFragmentManager.findFragmentByTag("sl") as SMSFragment?
-            if(test != null){
-                test.loadList()
-            }
+            test!!.addListeners()
+            Toast.makeText(this, "Please wait", Toast.LENGTH_LONG).show()
+            test.loadList()
         }
     }
 

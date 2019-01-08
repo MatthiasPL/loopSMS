@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_sms.*
 import kotlinx.android.synthetic.main.fragment_sms.view.*
+import kotlinx.android.synthetic.main.fragment_smssender.*
 import java.lang.ClassCastException
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
@@ -32,10 +33,13 @@ import javax.crypto.spec.SecretKeySpec
 class SMSFragment : Fragment() {
 
     var activityCallback: Listener? = null
+    var smslista = mutableListOf<String>()
+    var numerylista = mutableListOf<String>()
 
     interface Listener{
         fun getAllSMS(): List<Sms>
         fun loadSMSsenderFragment()
+        fun loadSMSsenderFragment(id: String)
     }
 
     companion object {
@@ -66,14 +70,20 @@ class SMSFragment : Fragment() {
 
     fun loadList(){
         try{
+            Toast.makeText(context, "Please wait", Toast.LENGTH_LONG).show()
             activityCallback = context as Listener
             val list = activityCallback!!.getAllSMS()
-            var smslista = mutableListOf<String>()
             val character = 5
             val singlecharacter = character.toChar()
             for (sms in list){
                 if(sms.msg[0]==singlecharacter){
-                    smslista.add(sms.address + " " + getDateTime(sms.time) + "\r\n\r\n" + Caesar.decrypt(sms.msg,3) + "\r\n")
+                    numerylista.add(sms.address!!)
+                    if(sms.folderName=="inbox"){
+                        smslista.add(sms.address + " " + getDateTime(sms.time) + "\r\n\r\n" + Caesar.decrypt(sms.msg,3) + "\r\n")
+                    }
+                    else{
+                        smslista.add("Sent: " + getDateTime(sms.time) + "\r\n\r\n" + Caesar.decrypt(sms.msg,3) + "\r\n")
+                    }
                 }
             }
             val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, smslista)
@@ -124,5 +134,16 @@ class SMSFragment : Fragment() {
 
         val decryptedByteValue = cipher.doFinal(Base64.decode(this, Base64.DEFAULT))
         return String(decryptedByteValue)
+    }
+
+    fun addListeners(){
+        lvSMS.setOnItemClickListener { parent, view, position, id ->
+            try{
+                activityCallback = context as Listener
+                activityCallback!!.loadSMSsenderFragment(numerylista[id.toInt()])
+            }catch(e: Exception){
+                throw ClassCastException(context?.toString()+" must implement Listener")
+            }
+        }
     }
 }
